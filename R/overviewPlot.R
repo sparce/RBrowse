@@ -70,8 +70,6 @@ overviewPlot <- function(input, output, session, genome, gene_annotation = NULL)
     )
 
     observeEvent(input$chrom, {
-        GenomeInfoDb::seqlevels(gene_annotation) <- input$chrom
-
         #pass through data on this view
         overview_data$chrom <- input$chrom
         overview_data$range_min <- 0
@@ -80,15 +78,15 @@ overviewPlot <- function(input, output, session, genome, gene_annotation = NULL)
         overview_data$selected_gene_coords <- NA
         }, ignoreNULL = TRUE)
 
-    # Main plot
-    output$overview_plot <- plotly::renderPlotly({
-        validate(need(input$chrom, message = F))
+    # Underlying data
+    gene_data <- reactive({
+        req(input$chrom)
 
-        #Empty plot
-        p <- ggplot(data.frame(x=c(0, Biostrings::nchar(genome[input$chrom]))), aes(x))
-
+        #browser()
         if(inherits(gene_annotation, "TxDb")) {
-            gene_data <- GenomicFeatures::transcripts(gene_annotation) %>%
+            GenomeInfoDb::seqlevels(gene_annotation) <- input$chrom
+
+            GenomicFeatures::transcripts(gene_annotation) %>%
                 biovizBase::addStepping(group.selfish = F, extend.size = 100) %>%
                 dplyr::as_data_frame() %>%
                 dplyr::mutate_if(is.factor, as.character) %>%
@@ -96,11 +94,24 @@ overviewPlot <- function(input, output, session, genome, gene_annotation = NULL)
                 dplyr::mutate(
                     arrowx = list(RBrowse::arrow_points(start, end, width, strand, base_y = stepping, coord = "x")),
                     arrowy = list(RBrowse::arrow_points(start, end, width, strand, base_y = stepping, coord = "y"))
-                    ) %>%
+                ) %>%
                 tidyr::unnest()
+        } else {
+            NULL
+        }
+    })
 
-            sd <- SharedData$new(gene_data, key = ~tx_id)
-            p <- p + geom_polygon(data = sd, aes(arrowx, arrowy, text = tx_name), colour = "black", size = .1, fill = "#777777")
+    #sd = crosstalk::SharedData$new(gene_data, key = ~tx_id)
+
+    # Main plot
+    output$overview_plot <- plotly::renderPlotly({
+        validate(need(input$chrom, message = F))
+        #browser()
+        #Empty plot
+        p <- ggplot(data.frame(x=c(0, Biostrings::nchar(genome[input$chrom]))), aes(x))
+
+        if(inherits(gene_annotation, "TxDb")) {
+            p <- p + geom_polygon(data = gene_data(), aes(arrowx, arrowy, text = tx_name, key = tx_id), colour = "black", size = .1, fill = "#777777")
 
             #plus_strand <- SharedData$new(gene_data %>% dplyr::filter(strand == "+"), key = ~tx_name)
             #minus_strand <- SharedData$new(gene_data %>% dplyr::filter(strand == "-"), key = ~tx_name)
@@ -131,9 +142,13 @@ overviewPlot <- function(input, output, session, genome, gene_annotation = NULL)
         # # Show plot
         # p
 
-        ggplotly(p, tooltip = 'text', source = "overview") %>%
-            layout(showlegend = F, yaxis = list(fixedrange = T)) %>%
-            highlight()
+        plotly::ggplotly(p + scale_x_continuous(expand=c(0.02,0)), tooltip = 'text', source = "overview") %>%
+            plotly::layout(
+                showlegend = F,
+                yaxis = list(fixedrange = T),
+                xaxis = list(autorange = F, tickmode = 'auto', nticks = 10)
+                ) %>%
+            plotly::highlight()
     })
 
     output$debug <- renderText(input$chrom)
@@ -147,12 +162,12 @@ overviewPlot <- function(input, output, session, genome, gene_annotation = NULL)
                 plotly::plotlyProxyInvoke(
                     "restyle",
                     list(fillcolor="blue"),
-                    sd$data() %>% group_by(tx_name) %>% summarise(strand = unique(strand)) %>% .$strand %>% grep("+",.)
+                    gene_data() %>% dplyr::group_by(tx_name) %>% dplyr::summarise(strand = unique(strand)) %>% .$strand %>% grep("+",.)
                     ) %>%
                 plotly::plotlyProxyInvoke(
                     "restyle",
                     list(fillcolor="red"),
-                    sd$data() %>% group_by(tx_name) %>% summarise(strand = unique(strand)) %>% .$strand %>% grep("-",.)
+                    gene_data() %>% dplyr::group_by(tx_name) %>% dplyr::summarise(strand = unique(strand)) %>% .$strand %>% grep("-",.)
                     )
         } else {
             plotly::plotlyProxy(ns("overview_plot"), session) %>%
@@ -164,12 +179,28 @@ overviewPlot <- function(input, output, session, genome, gene_annotation = NULL)
     }, ignoreNULL = T)
 
 
-    observeEvent(event_data("plotly_click", source = "overview"), {
-        d <- event_data("plotly_click", source = "overview")
+    observeEvent(plotly::event_data("plotly_click", source = "overview"), {
+        d <- plotly::event_data("plotly_click", source = "overview")
+        #browser()
+        overview_data$selected_gene <- d %>%
+            dplyr::mutate_at("key",as.integer) %>%
+            dplyr::left_join(gene_data() %>% dplyr::select(-stepping, -arrowx, -arrowy), by = c(key = "tx_id")) %>%
+            unique
+        #overview_data$selected_gene_coords <- biovizBase::crunch(gene_annotation, which = list(tx_id=d$key))
 
-        overview_data$selected_gene <- c(d, tx_name = sd$data() %>% filter(tx_id == d$key) %>% .$tx_name %>% unique)
-        overview_data$selected_gene_coords <- biovizBase::crunch(gene_annotation, which = list(tx_id=d$key))
+        plotly::plotlyProxy(session$ns("overview_plot")) %>%
+            plotly::plotlyProxyInvoke("restyle", list(opacity = 0.2)) %>%
+            plotly::plotlyProxyInvoke("restyle", list(opacity = 1), list(d$curveNumber))
     })
+
+    observeEvent(plotly::event_data("plotly_relayout", source = "overview"), {
+        d <- plotly::event_data("plotly_relayout", source = "overview")
+
+        #browser()
+        overview_data$range_min <- d[['xaxis.range[0]']]
+        overview_data$range_max <- d[['xaxis.range[1]']]
+    })
+
 
     od <- reactive(reactiveValuesToList(overview_data))
     return(od)
