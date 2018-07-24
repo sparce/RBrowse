@@ -65,8 +65,7 @@ overviewPlot <- function(input, output, session, genome, gene_annotation = NULL)
         chrom = "",
         range_min = 0,
         range_max = 0,
-        selected_gene = NA,
-        selected_gene_coords = NA
+        selected_gene = NA
     )
 
     observeEvent(input$chrom, {
@@ -75,7 +74,6 @@ overviewPlot <- function(input, output, session, genome, gene_annotation = NULL)
         overview_data$range_min <- 0
         overview_data$range_max <- Biostrings::nchar(genome[input$chrom])
         overview_data$selected_gene <- NA
-        overview_data$selected_gene_coords <- NA
         }, ignoreNULL = TRUE)
 
     # Underlying data
@@ -197,8 +195,12 @@ overviewPlot <- function(input, output, session, genome, gene_annotation = NULL)
         d <- plotly::event_data("plotly_relayout", source = "overview")
 
         #browser()
+        overview_data$selected_gene <- NA
         overview_data$range_min <- d[['xaxis.range[0]']]
         overview_data$range_max <- d[['xaxis.range[1]']]
+
+        plotly::plotlyProxy(session$ns("overview_plot")) %>%
+            plotly::plotlyProxyInvoke("restyle", list(opacity = 1))
     })
 
 
