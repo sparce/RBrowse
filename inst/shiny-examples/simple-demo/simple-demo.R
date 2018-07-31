@@ -1,6 +1,9 @@
 library(shiny)
 library(RBrowse)
 
+#Needs GenomicFeatures loaded before calling AnnotationDbi::loadDb
+library(GenomicFeatures)
+
 ui <- fluidPage(
     h3("overviewPlot"),
     RBrowse::overviewPlotUI("simple-demo"),

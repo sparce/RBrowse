@@ -61,7 +61,7 @@ overviewPlot <- function(input, output, session, genome, gene_annotation = NULL)
         if(stringr::str_detect(extension, "gff|gtf")) gene_annotation <- GenomicFeatures::makeTxDbFromGFF(gene_annotation)
 
         #TxDb object saved with AnnotationDbi::saveDb
-        if(stringr::str_detect(extension, "sqlite")) gene_annotation <- AnnotationDbi::loadDb(gene_annotation)
+        if(stringr::str_detect(extension, "sqlite") & requireNamespace("GenomicFeatures", quietly = TRUE)) gene_annotation <- AnnotationDbi::loadDb(gene_annotation)
     }
 
     # Customisation options for overview plot
