@@ -1,5 +1,8 @@
 #' Run RBrowse demo
 #'
+#' This crashes out to the debug console when exiting the function, but not when you
+#' just run the \code{runApp} call separately. Don't know why yet.
+#'
 #' @param demo Name of the demo to run.
 #' @param ... Additional arguments passed to \code{\link[shiny]{runApp}}
 #'

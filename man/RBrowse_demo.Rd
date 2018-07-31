@@ -12,7 +12,8 @@ RBrowse_demo(demo = "simple-demo", ...)
 \item{...}{Additional arguments passed to \code{\link[shiny]{runApp}}}
 }
 \description{
-Run RBrowse demo
+This crashes out to the debug console when exiting the function, but not when you
+just run the \code{runApp} call separately. Don't know why yet.
 }
 \examples{
 if (interactive()) {
