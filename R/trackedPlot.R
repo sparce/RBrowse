@@ -10,10 +10,10 @@
 #'
 #' @examples
 trackedPlotUI <- function(id) {
-    ns = NS(id)
+    ns = shiny::NS(id)
 
-    fluidRow(
-        uiOutput(ns("options_dropdown")),
+    shiny::fluidRow(
+        shiny::uiOutput(ns("options_dropdown")),
         plotly::plotlyOutput(ns("tracked_plot"))
     )
 }
@@ -65,13 +65,13 @@ trackedPlot <- function(input, output, session, data, data_fn, plot_fn, options 
         )
     })
 
-    data_r <- reactive({ data_fn(data) })
+    data_r <- shiny::reactive({ data_fn(data) })
 
-    selection_box <- reactiveVal(NULL)
+    selection_box <- shiny::reactiveVal(NULL)
 
-    plot_r <- reactive({ plot_fn(data_r()) + selection_box() })
+    plot_r <- shiny::reactive({ plot_fn(data_r()) + selection_box() })
 
-    plotly_r <- reactive({
+    plotly_r <- shiny::reactive({
         req(data_r(), plot_r())
 
         plotly::ggplotly(
@@ -99,33 +99,33 @@ trackedPlot <- function(input, output, session, data, data_fn, plot_fn, options 
         plotly_r()
     })
 
-    observeEvent(plotly::event_data("plotly_relayout", source = "overview"), {
+    shiny::observeEvent(plotly::event_data("plotly_relayout", source = "overview"), {
         d <- plotly::event_data("plotly_relayout", source = "overview")
 
         plotly::plotlyProxy(ns("tracked_plot"), session) %>%
             plotly::plotlyProxyInvoke("relayout", xaxis = list(range = c(d[['xaxis.range[0]']], d[['xaxis.range[1]']])), automargin = F)
     })
 
-    observeEvent(overview()$selected_gene, {
+    shiny::observeEvent(overview()$selected_gene, {
         #browser()
         if(!is.data.frame(overview()$selected_gene)) {
             #browser()
             selection_box(NULL)
         } else {
-            yrange <- isolate(plotly_r()$x$layout$yaxis$range)
-            xrange <- isolate(c(overview()$selected_gene$start, overview()$selected_gene$end))
-            sel <- geom_polygon(
+            yrange <- shiny::isolate(plotly_r()$x$layout$yaxis$range)
+            xrange <- shiny::isolate(c(overview()$selected_gene$start, overview()$selected_gene$end))
+            sel <- ggplot2::geom_polygon(
                 data = data.frame(x = c(xrange[1], xrange[1], xrange[2] ,xrange[2], xrange[1]), y = c(yrange[1], yrange[2], yrange[2], yrange[1], yrange[1])),
-                aes(x, y),
+                ggplot2::aes(x, y),
                 colour = NA,
                 fill = "#FF0000",
                 alpha = 0.1,
                 inherit.aes = F
             )
-            selection_box(list(sel, scale_y_continuous(expand = c(0,0))))
+            selection_box(list(sel, ggplot2::scale_y_continuous(expand = c(0,0))))
         }
     }, ignoreInit = T)
 
-    return(reactive(list(plot = plot_r())))
+    return(shiny::reactive(list(plot = plot_r())))
 
 }
