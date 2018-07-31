@@ -13,11 +13,11 @@ overviewPlot(input, output, session, genome, gene_annotation = NULL)
 
 \item{session}{The shiny session object. Passed automatically from \code{callModule}}
 
+\item{genome}{File path to a fasta formatted file containing the genome assembly}
+
 \item{gene_annotation}{Optional set of gene annotations as either a file path to a
 gff formatted file, a \code{\link[GenomicFeatures]{TxDb}} object, or a filepath to a
 \code{TxDb} object saved with \code{\link[AnnotationDbi]{saveDb}}.}
-
-\item{genome_fasta}{File path to a fasta formatted file containing the genome assembly}
 }
 \value{
 The server function required to produce and interact with an RBrowse

@@ -2,12 +2,10 @@
 #'
 #' The \code{testPlot} is a test run at configuring plots using the \code{\link{trackedPlot}} module
 #'
-#' @param id
+#' @param id Shiny id of the plot. This must be unique within your app.
 #'
 #' @return A set of shiny components comprising an RBrowse test plot
 #' @export
-#'
-#' @examples
 testPlotUI <- function(id) {
     ns = shiny::NS(id)
      RBrowse::trackedPlotUI(ns("tracked"))
@@ -32,8 +30,6 @@ testPlotUI <- function(id) {
 #' @return passes through the output from \code{trackedPlot}, ie. a reactive list containing
 #' the plot
 #' @export
-#'
-#' @examples
 testPlot <- function(input, output, session, data_file, overview, bin_width = NULL) {
     ns = session$ns
 

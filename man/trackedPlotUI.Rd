@@ -7,7 +7,7 @@
 trackedPlotUI(id)
 }
 \arguments{
-\item{id}{}
+\item{id}{Shiny id of the plot. This must be unique within your app.}
 }
 \value{
 A set of shiny components comprising an RBrowse tracked plot

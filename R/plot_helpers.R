@@ -13,8 +13,6 @@
 #' @param hh Half height of gene. Gene arrow will be drawn at \code{base_y +/- hh}
 #'
 #' @return Vector of coordinates used to plot a gene arrow
-#'
-#' @examples
 arrow_points <- function(start, end, width, strand, base_y, coord = c("x","y"), pct = 0.2, hh = 0.4) {
     if(as.character(strand) == "+") {
         if(coord == "x") return(c(start,start, end-(pct*width), end, end-(pct*width), start))

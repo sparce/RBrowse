@@ -12,8 +12,6 @@
 #'
 #' @return A set of shiny components comprising an RBrowse overview plot
 #' @export
-#'
-#' @examples
 overviewPlotUI <- function(id) {
     ns <- shiny::NS(id)
 
@@ -36,7 +34,7 @@ overviewPlotUI <- function(id) {
 #' @param output The shiny output object. Passed automatically from \code{callModule}
 #' @param session The shiny session object. Passed automatically from \code{callModule}
 #'
-#' @param genome_fasta File path to a fasta formatted file containing the genome assembly
+#' @param genome File path to a fasta formatted file containing the genome assembly
 #' @param gene_annotation Optional set of gene annotations as either a file path to a
 #' gff formatted file, a \code{\link[GenomicFeatures]{TxDb}} object, or a filepath to a
 #' \code{TxDb} object saved with \code{\link[AnnotationDbi]{saveDb}}.
@@ -47,8 +45,6 @@ overviewPlotUI <- function(id) {
 #' to downstream visualisations (see examples for how to use this).
 #'
 #' @export
-#'
-#' @examples
 overviewPlot <- function(input, output, session, genome, gene_annotation = NULL) {
     # If given path to a file, try to load them in a sensible fashion.
     # Otherwise, we will assume that we are passed objects of the correct type
@@ -85,14 +81,14 @@ overviewPlot <- function(input, output, session, genome, gene_annotation = NULL)
         )
     })
 
-    overview_data <- reactiveValues(
+    overview_data <- shiny::reactiveValues(
         chrom = "",
         range_min = 0,
         range_max = 0,
         selected_gene = NA
     )
 
-    observeEvent(input$chrom, {
+    shiny::observeEvent(input$chrom, {
         #pass through data on this view
         overview_data$chrom <- input$chrom
         overview_data$range_min <- 0
@@ -101,7 +97,7 @@ overviewPlot <- function(input, output, session, genome, gene_annotation = NULL)
     }, ignoreNULL = TRUE)
 
     # Underlying data
-    gene_data <- reactive({
+    gene_data <- shiny::reactive({
         req(input$chrom)
 
         #browser()
@@ -203,7 +199,7 @@ overviewPlot <- function(input, output, session, genome, gene_annotation = NULL)
     }, ignoreNULL = T)
 
 
-    observeEvent(plotly::event_data("plotly_click", source = "overview"), {
+    shiny::observeEvent(plotly::event_data("plotly_click", source = "overview"), {
         d <- plotly::event_data("plotly_click", source = "overview")
         #browser()
         overview_data$selected_gene <- d %>%

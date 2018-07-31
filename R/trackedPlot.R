@@ -3,12 +3,10 @@
 #' The \code{trackedPlot} provides a generic interface for producing plots from
 #' position based genomic data.
 #'
-#' @param id
+#' @param id Shiny id of the plot. This must be unique within your app.
 #'
 #' @return A set of shiny components comprising an RBrowse tracked plot
 #' @export
-#'
-#' @examples
 trackedPlotUI <- function(id) {
     ns = shiny::NS(id)
 
@@ -45,15 +43,13 @@ trackedPlotUI <- function(id) {
 #' @return A reactive list of plot features. For now only returns the ggplot from which
 #' the plotly plot is produced.
 #' @export
-#'
-#' @examples
 trackedPlot <- function(input, output, session, data, data_fn, plot_fn, options = NULL, overview) {
     ns <- session$ns
 
-    output$options_dropdown <- renderUI({
-        validate(need(options(), message = F))
+    output$options_dropdown <- shiny::renderUI({
+        shiny::validate(shiny::need(options(), message = F))
 
-        div(style = "position: absolute; z-index: 1;",
+        shiny::div(style = "position: absolute; z-index: 1;",
             shinyWidgets::dropdown(
                 options(),
                 style = "unite",
