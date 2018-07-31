@@ -114,8 +114,8 @@ overviewPlot <- function(input, output, session, genome, gene_annotation = NULL)
                 dplyr::mutate_if(is.factor, as.character) %>%
                 dplyr::group_by(tx_name) %>%
                 dplyr::mutate(
-                    arrowx = list(RBrowse::arrow_points(start, end, width, strand, base_y = stepping, coord = "x")),
-                    arrowy = list(RBrowse::arrow_points(start, end, width, strand, base_y = stepping, coord = "y"))
+                    arrowx = list(arrow_points(start, end, width, strand, base_y = stepping, coord = "x")),
+                    arrowy = list(arrow_points(start, end, width, strand, base_y = stepping, coord = "y"))
                 ) %>%
                 tidyr::unnest()
         } else {
