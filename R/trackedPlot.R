@@ -76,8 +76,8 @@ trackedPlot <- function(input, output, session, data, data_fn, plot_fn, options 
 
         plotly::ggplotly(
             plot_r() +
-                coord_cartesian(xlim = c(overview()$range_min, overview()$range_max))+
-                scale_x_continuous(expand = c(0,0))
+                ggplot2::coord_cartesian(xlim = c(overview()$range_min, overview()$range_max))+
+                ggplot2::scale_x_continuous(expand = c(0,0))
             , tooltip = "text") %>%
             plotly::layout(
                 showlegend = F,

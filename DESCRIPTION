@@ -12,4 +12,5 @@ Imports: magrittr,
     ggplot2,
     plotly,
     GenomicFeatures,
-    glue
+    glue,
+    shinyWidgets

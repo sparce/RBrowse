@@ -68,7 +68,7 @@ overviewPlot <- function(input, output, session, genome, gene_annotation = NULL)
     output$options_dropdown <- shiny::renderUI({
         ns <- session$ns
 
-        validate(need(genome, message = F))
+        shiny::req(genome)
 
         annotation_opts <- NULL
         if(!is.null(gene_annotation)) {
@@ -130,10 +130,10 @@ overviewPlot <- function(input, output, session, genome, gene_annotation = NULL)
         validate(need(input$chrom, message = F))
         #browser()
         #Empty plot
-        p <- ggplot(data.frame(x=c(0, Biostrings::nchar(genome[input$chrom]))), aes(x))
+        p <- ggplot2::ggplot(data.frame(x=c(0, Biostrings::nchar(genome[input$chrom]))), ggplot2::aes(x))
 
         if(inherits(gene_annotation, "TxDb")) {
-            p <- p + geom_polygon(data = gene_data(), aes(arrowx, arrowy, text = tx_name, key = tx_id), colour = "black", size = .1, fill = "#777777")
+            p <- p + ggplot2::geom_polygon(data = gene_data(), ggplot2::aes(arrowx, arrowy, text = tx_name, key = tx_id), colour = "black", size = .1, fill = "#777777")
 
             #plus_strand <- SharedData$new(gene_data %>% dplyr::filter(strand == "+"), key = ~tx_name)
             #minus_strand <- SharedData$new(gene_data %>% dplyr::filter(strand == "-"), key = ~tx_name)
@@ -164,7 +164,7 @@ overviewPlot <- function(input, output, session, genome, gene_annotation = NULL)
         # # Show plot
         # p
 
-        plotly::ggplotly(p + scale_x_continuous(expand=c(0.02,0)), tooltip = 'text', source = "overview") %>%
+        plotly::ggplotly(p + ggplot2::scale_x_continuous(expand=c(0.02,0)), tooltip = 'text', source = "overview") %>%
             plotly::layout(
                 showlegend = F,
                 title = input$chrom,
@@ -175,10 +175,10 @@ overviewPlot <- function(input, output, session, genome, gene_annotation = NULL)
             plotly::highlight()
     })
 
-    output$debug <- renderText(input$chrom)
+    output$debug <- shiny::renderText(input$chrom)
 
     # Colour genes by strand if selected
-    observeEvent(c(input$by_strand), {
+    shiny::observeEvent(c(input$by_strand), {
         ns <- session$ns
 
         if(input$by_strand) {
@@ -217,7 +217,7 @@ overviewPlot <- function(input, output, session, genome, gene_annotation = NULL)
             plotly::plotlyProxyInvoke("restyle", list(opacity = 1), list(d$curveNumber))
     })
 
-    observeEvent(plotly::event_data("plotly_relayout", source = "overview"), {
+    shiny::observeEvent(plotly::event_data("plotly_relayout", source = "overview"), {
         d <- plotly::event_data("plotly_relayout", source = "overview")
 
         #browser()
@@ -230,6 +230,6 @@ overviewPlot <- function(input, output, session, genome, gene_annotation = NULL)
     })
 
 
-    od <- reactive(reactiveValuesToList(overview_data))
+    od <- shiny::reactive(reactiveValuesToList(overview_data))
     return(od)
 }

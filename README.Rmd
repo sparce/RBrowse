@@ -1,0 +1,38 @@
+---
+output:
+  md_document:
+    variant: markdown_github
+---
+
+<!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r, echo = FALSE}
+library(remotes)
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "README-"
+)
+```
+
+# RBrowse
+
+A set of modular components for creating interactive genome browsers in R
+
+## Installation
+
+Can be installed using `install_github` from the `devtools` or `remotes` package:
+
+```{r install, eval = F}
+install_github("sparce/RBrowse")
+```
+
+## Demo
+
+A demo explaining some of the included features can be found by running:
+
+```{r demo, eval = F}
+library(RBrowse)
+RBrowse_demo(display.mode = "showcase")
+```
+
