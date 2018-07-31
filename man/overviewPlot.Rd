@@ -2,13 +2,31 @@
 % Please edit documentation in R/overviewPlot.R
 \name{overviewPlot}
 \alias{overviewPlot}
-\title{Title}
+\title{Server code for an RBrowse overview plot}
 \usage{
 overviewPlot(input, output, session, genome, gene_annotation = NULL)
 }
 \arguments{
-\item{gene_annotation}{}
+\item{input}{The shiny input object. Passed automatically from \code{callModule}}
+
+\item{output}{The shiny output object. Passed automatically from \code{callModule}}
+
+\item{session}{The shiny session object. Passed automatically from \code{callModule}}
+
+\item{gene_annotation}{Optional set of gene annotations as either a file path to a
+gff formatted file, a \code{\link[GenomicFeatures]{TxDb}} object, or a filepath to a
+\code{TxDb} object saved with \code{\link[AnnotationDbi]{saveDb}}.}
+
+\item{genome_fasta}{File path to a fasta formatted file containing the genome assembly}
+}
+\value{
+The server function required to produce and interact with an RBrowse
+overview plot. In addition, the function returns a reactive object containing
+information about the plot (chromosome/range/gene selection) which can be passed
+to downstream visualisations (see examples for how to use this).
 }
 \description{
-Title
+This produces the server code necessary for an RBrowse \code{overviewPlot} to function.
+It is not called directly, but rather using the \code{\link[shiny]{callModule}} function
+from shiny.
 }

@@ -1,26 +1,36 @@
-#' Title
+#' UI for an RBrowse test plot
+#'
+#' The \code{testPlot} is a test run at configuring plots using the \code{\link{trackedPlot}} module
 #'
 #' @param id
 #'
-#' @return
+#' @return A set of shiny components comprising an RBrowse test plot
 #' @export
 #'
 #' @examples
 testPlotUI <- function(id) {
-    ns = NS(id)
-    trackedPlotUI(ns("tracked"))
+    ns = shiny::NS(id)
+     RBrowse::trackedPlotUI(ns("tracked"))
 }
 
-#' Title
+#' Server code for an RBrowse test plot
 #'
-#' @param input
-#' @param output
-#' @param session
-#' @param data_file
-#' @param overview
-#' @param bin_width
+#' The \code{testPlot} is a test run at configuring plots using the \code{\link{trackedPlot}} module.
+#' It will be used as an example for creating a number of modules designed to produce common
+#' types of genomic tracked plots (eg. manhattanPlot, bamPlot, snpPlot, geneStructurePlot, ...)
+#' It shows how to produce the necessary inputs for \code{trackedPlot} and how to call it
 #'
-#' @return
+#' @param input The shiny input object. Passed automatically from \code{callModule}
+#' @param output The shiny output object. Passed automatically from \code{callModule}
+#' @param session The shiny session object. Passed automatically from \code{callModule}
+#'
+#' @param data_file File path to a data file.
+#' @param overview Returned data from calling the \code{\link{overviewPlot}} module. Needed to coordinate the view ranges
+#' @param bin_width Width of the bins in the data file. Included as an example of how you can use
+#' additional arguments
+#'
+#' @return passes through the output from \code{trackedPlot}, ie. a reactive list containing
+#' the plot
 #' @export
 #'
 #' @examples
@@ -37,27 +47,28 @@ testPlot <- function(input, output, session, data_file, overview, bin_width = NU
 
     }
 
-    option_setters <- reactive({
-        tagList(
-            selectizeInput(ns("data"), "Data to plot:", choices = colnames(GenomicRanges::mcols(plot_data(data)))),
-            numericInput(ns("cutoff"), "Value cutoff:", 1, min = 0, step = 1),
-            numericInput(ns("highlight"), "Value highlight:", 5, min = 0, step = 1)
+    option_setters <- shiny::reactive({
+        shiny::tagList(
+            shiny::selectizeInput(ns("data"), "Data to plot:", choices = colnames(GenomicRanges::mcols(plot_data(data)))),
+            shiny::numericInput(ns("cutoff"), "Value cutoff:", 1, min = 0, step = 1),
+            shiny::numericInput(ns("highlight"), "Value highlight:", 5, min = 0, step = 1)
         )
     })
 
     plot_f <- function(p) {
-        validate(need(input$data, message = F))
+        shiny::req(input$data, overview()$range_min, overview()$range_max)
 
         sym_y <- rlang::sym(input$data)
 
         p %>%
             plyranges::filter_by_overlaps(GenomicRanges::GRanges(seqnames = overview()$chrom, ranges = IRanges::IRanges(start = overview()$range_min, end = overview()$range_max))) %>%
             plyranges::filter(!!sym_y > input$cutoff) %>%as.data.frame() %>%
-            ggplot(aes(x = start+(width/2), y = !!sym_y, yend = !!sym_y)) +
-            geom_segment(aes(x = start, xend = end, colour = !!sym_y > input$highlight), size = 0.5) +
-            geom_point(aes(colour = !!sym_y > input$highlight))
+            ggplot2::ggplot(ggplot2::aes(x = start+(width/2), y = !!sym_y, yend = !!sym_y, text = !!sym_y, key = !!sym_y)) +
+            ggplot2::geom_segment(ggplot2::aes(x = start, xend = end, colour = !!sym_y > input$highlight), size = 0.5) +
+            ggplot2::geom_point(ggplot2::aes(colour = !!sym_y > input$highlight))
     }
 
-    plot_result = callModule(trackedPlot, "tracked", data = data, data_fn = plot_data, plot_fn = plot_f, options = option_setters, overview = overview)
+    tracked_plot_output = shiny::callModule(trackedPlot, "tracked", data = data, data_fn = plot_data, plot_fn = plot_f, options = option_setters, overview = overview)
 
+    return(tracked_plot_output)
 }

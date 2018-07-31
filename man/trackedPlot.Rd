@@ -2,14 +2,41 @@
 % Please edit documentation in R/trackedPlot.R
 \name{trackedPlot}
 \alias{trackedPlot}
-\title{Title}
+\title{Server code for an RBrowse tracked plot}
 \usage{
 trackedPlot(input, output, session, data, data_fn, plot_fn, options = NULL,
   overview)
 }
 \arguments{
-\item{overview}{}
+\item{input}{The shiny input object. Passed automatically from \code{callModule}}
+
+\item{output}{The shiny output object. Passed automatically from \code{callModule}}
+
+\item{session}{The shiny session object. Passed automatically from \code{callModule}}
+
+\item{data}{The data to be passed in for the plot. This may be a file path or
+an in-memory object depending on how the \code{data_fn} is written}
+
+\item{data_fn}{A function that takes \code{data} and prepares it for plotting.
+Will be run in a reactive context, so can access input options}
+
+\item{plot_fn}{A function that takes the output of \code{data_fn} and produces
+a ggplot plot that will eventually be converted with \code{\link[plotly]{ggplotly}}.
+Will be run in a reactive context, so can access input options}
+
+\item{options}{An optional \code{\link[shiny]{tagList}} containing input elements used as
+configuration options for the tracked plot. These are available to be used in the
+\code{data_fn} and \code{plot_fn} and will be accessible through a dropdown box}
+
+\item{overview}{The return value from calling the \code{\link{overviewPlot}} module.
+This is necessary to provide the automatic range adjustment behaviour and the overlay of a selected gene}
+}
+\value{
+A reactive list of plot features. For now only returns the ggplot from which
+the plotly plot is produced.
 }
 \description{
-Title
+This produces the server code necessary for an RBrowse \code{trackedPlot} to function.
+It is not called directly, but rather using the \code{\link[shiny]{callModule}} function
+from shiny. Before designing a custom visualisation with \code{trackedPlot}
 }

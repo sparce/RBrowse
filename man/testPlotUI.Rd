@@ -2,13 +2,16 @@
 % Please edit documentation in R/testPlot.R
 \name{testPlotUI}
 \alias{testPlotUI}
-\title{Title}
+\title{UI for an RBrowse test plot}
 \usage{
 testPlotUI(id)
 }
 \arguments{
 \item{id}{}
 }
+\value{
+A set of shiny components comprising an RBrowse test plot
+}
 \description{
-Title
+The \code{testPlot} is a test run at configuring plots using the \code{\link{trackedPlot}} module
 }

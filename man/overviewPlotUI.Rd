@@ -2,13 +2,23 @@
 % Please edit documentation in R/overviewPlot.R
 \name{overviewPlotUI}
 \alias{overviewPlotUI}
-\title{Title}
+\title{UI for an RBrowse overview plot}
 \usage{
 overviewPlotUI(id)
 }
 \arguments{
-\item{id}{}
+\item{id}{Shiny id of the plot. This must be unique within your app.}
+}
+\value{
+A set of shiny components comprising an RBrowse overview plot
 }
 \description{
-Title
+The \code{overviewPlot} provides the main way of controlling and interacting with
+an RBrowse browser. It allows selection of a chromosome/scaffold as well as a
+genomic range to view from a fasta file. If gene annotations are provided it
+also allows selection of an individual transcript to highlight in downstream plots.
+}
+\details{
+You should include one (and only one) \code{overviewPlot} for each set of linked,
+interactive downstream plots you wish to produce
 }

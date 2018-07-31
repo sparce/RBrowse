@@ -1,8 +1,16 @@
-#' Title
+#' UI for an RBrowse overview plot
 #'
-#' @param id
+#' The \code{overviewPlot} provides the main way of controlling and interacting with
+#' an RBrowse browser. It allows selection of a chromosome/scaffold as well as a
+#' genomic range to view from a fasta file. If gene annotations are provided it
+#' also allows selection of an individual transcript to highlight in downstream plots.
 #'
-#' @return
+#' You should include one (and only one) \code{overviewPlot} for each set of linked,
+#' interactive downstream plots you wish to produce
+#'
+#' @param id Shiny id of the plot. This must be unique within your app.
+#'
+#' @return A set of shiny components comprising an RBrowse overview plot
 #' @export
 #'
 #' @examples
@@ -10,23 +18,34 @@ overviewPlotUI <- function(id) {
     ns <- shiny::NS(id)
 
     shiny::fluidRow(class = "overview",
-        shiny::uiOutput(ns("options_dropdown")),
-        plotly::plotlyOutput(ns("overview_plot"), height = "200px"),
-        #verbatimTextOutput(ns("debug")),
-        NULL
+                    shiny::uiOutput(ns("options_dropdown")),
+                    plotly::plotlyOutput(ns("overview_plot"), height = "200px"),
+                    #verbatimTextOutput(ns("debug")),
+                    NULL
     )
 }
 
 
-#' Title
+#' Server code for an RBrowse overview plot
 #'
-#' @param input
-#' @param output
-#' @param session
-#' @param genome_fasta
-#' @param gene_annotation
+#' This produces the server code necessary for an RBrowse \code{overviewPlot} to function.
+#' It is not called directly, but rather using the \code{\link[shiny]{callModule}} function
+#' from shiny.
 #'
-#' @return
+#' @param input The shiny input object. Passed automatically from \code{callModule}
+#' @param output The shiny output object. Passed automatically from \code{callModule}
+#' @param session The shiny session object. Passed automatically from \code{callModule}
+#'
+#' @param genome_fasta File path to a fasta formatted file containing the genome assembly
+#' @param gene_annotation Optional set of gene annotations as either a file path to a
+#' gff formatted file, a \code{\link[GenomicFeatures]{TxDb}} object, or a filepath to a
+#' \code{TxDb} object saved with \code{\link[AnnotationDbi]{saveDb}}.
+#'
+#' @return The server function required to produce and interact with an RBrowse
+#' overview plot. In addition, the function returns a reactive object containing
+#' information about the plot (chromosome/range/gene selection) which can be passed
+#' to downstream visualisations (see examples for how to use this).
+#'
 #' @export
 #'
 #' @examples
@@ -40,25 +59,30 @@ overviewPlot <- function(input, output, session, genome, gene_annotation = NULL)
 
         #GFF/GTF file
         if(stringr::str_detect(extension, "gff|gtf")) gene_annotation <- GenomicFeatures::makeTxDbFromGFF(gene_annotation)
+
+        #TxDb object saved with AnnotationDbi::saveDb
+        if(stringr::str_detect(extension, "sqlite")) gene_annotation <- AnnotationDbi::loadDb(gene_annotation)
     }
 
     # Customisation options for overview plot
     output$options_dropdown <- shiny::renderUI({
-            ns <- session$ns
+        ns <- session$ns
 
-            validate(need(genome, message = F))
+        validate(need(genome, message = F))
 
-            annotation_opts <- NULL
-            if(!is.null(gene_annotation)) {
-                annotation_opts <- shiny::checkboxInput(ns("by_strand"), "Colour by strand:")
-            }
+        annotation_opts <- NULL
+        if(!is.null(gene_annotation)) {
+            annotation_opts <- shiny::checkboxInput(ns("by_strand"), "Colour by strand:")
+        }
 
+        div(style = "position: absolute; z-index: 1;",
             shinyWidgets::dropdown(
                 shiny::tagList(
                     shiny::selectizeInput(ns("chrom"), "Sequence:", choices = names(genome), selected = NULL),
                     annotation_opts
                 )
             )
+        )
     })
 
     overview_data <- reactiveValues(
@@ -74,7 +98,7 @@ overviewPlot <- function(input, output, session, genome, gene_annotation = NULL)
         overview_data$range_min <- 0
         overview_data$range_max <- Biostrings::nchar(genome[input$chrom])
         overview_data$selected_gene <- NA
-        }, ignoreNULL = TRUE)
+    }, ignoreNULL = TRUE)
 
     # Underlying data
     gene_data <- reactive({
@@ -143,9 +167,11 @@ overviewPlot <- function(input, output, session, genome, gene_annotation = NULL)
         plotly::ggplotly(p + scale_x_continuous(expand=c(0.02,0)), tooltip = 'text', source = "overview") %>%
             plotly::layout(
                 showlegend = F,
-                yaxis = list(fixedrange = T),
-                xaxis = list(autorange = F, tickmode = 'auto', nticks = 10)
-                ) %>%
+                title = input$chrom,
+                titlefont = list(size = 14),
+                yaxis = list(fixedrange = T, title = NA, showticklabels = F, ticklen=0),
+                xaxis = list(title = NA, autorange = F, tickmode = 'auto', nticks = 10)
+            ) %>%
             plotly::highlight()
     })
 
@@ -161,18 +187,18 @@ overviewPlot <- function(input, output, session, genome, gene_annotation = NULL)
                     "restyle",
                     list(fillcolor="blue"),
                     gene_data() %>% dplyr::group_by(tx_name) %>% dplyr::summarise(strand = unique(strand)) %>% .$strand %>% grep("+",.)
-                    ) %>%
+                ) %>%
                 plotly::plotlyProxyInvoke(
                     "restyle",
                     list(fillcolor="red"),
                     gene_data() %>% dplyr::group_by(tx_name) %>% dplyr::summarise(strand = unique(strand)) %>% .$strand %>% grep("-",.)
-                    )
+                )
         } else {
             plotly::plotlyProxy(ns("overview_plot"), session) %>%
                 plotly::plotlyProxyInvoke(
                     "restyle",
                     list(fillcolor = "#777")
-                    )
+                )
         }
     }, ignoreNULL = T)
 

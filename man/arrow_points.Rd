@@ -2,14 +2,32 @@
 % Please edit documentation in R/plot_helpers.R
 \name{arrow_points}
 \alias{arrow_points}
-\title{Title}
+\title{Gene arrow points}
 \usage{
 arrow_points(start, end, width, strand, base_y, coord = c("x", "y"),
   pct = 0.2, hh = 0.4)
 }
 \arguments{
-\item{hh}{}
+\item{start}{Start coordinate of gene}
+
+\item{end}{End coordinate of gene}
+
+\item{width}{Width of gene}
+
+\item{strand}{Strand of gene (does arrow point left or right)}
+
+\item{base_y}{y value to center gene around (usually a stepping value from \code{\link[biovizBase]{addStepping}})}
+
+\item{coord}{Either \code{x} or \code{y} determining which set of coordinates to return}
+
+\item{pct}{Percentage of gene width to be taken up by the arrow}
+
+\item{hh}{Half height of gene. Gene arrow will be drawn at \code{base_y +/- hh}}
+}
+\value{
+Vector of coordinates used to plot a gene arrow
 }
 \description{
-Title
+Calculates the coordinates for drawing a gene arrow, given a set of start/end coordinates
+and a midline y value.
 }

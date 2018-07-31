@@ -2,13 +2,17 @@
 % Please edit documentation in R/trackedPlot.R
 \name{trackedPlotUI}
 \alias{trackedPlotUI}
-\title{Title}
+\title{UI for an RBrowse tracked plot}
 \usage{
 trackedPlotUI(id)
 }
 \arguments{
-\item{...}{}
+\item{id}{}
+}
+\value{
+A set of shiny components comprising an RBrowse tracked plot
 }
 \description{
-Title
+The \code{trackedPlot} provides a generic interface for producing plots from
+position based genomic data.
 }
