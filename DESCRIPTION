@@ -27,4 +27,7 @@ Imports: magrittr,
     rlang,
     shiny,
     stringr,
-    tidyr
+    tidyr,
+    broom,
+    biobroom,
+    RColorBrewer

@@ -2,6 +2,10 @@
 
 export("%>%")
 export(RBrowse_demo)
+export(coefficientPlot)
+export(coefficientPlotUI)
+export(entityPlot)
+export(entityPlotUI)
 export(overviewPlot)
 export(overviewPlotUI)
 export(testPlot)
