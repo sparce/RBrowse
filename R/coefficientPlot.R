@@ -35,7 +35,7 @@ coefficientPlot <- function(input, output, session, data_file, overview) {
 
     fitted_model <- readr::read_rds(data_file)
 
-    tidied_coefficients <- broom::tidy(fitted_model) %>% dplyr::filter(!stringr::str_detect(term, "sva"))
+    tidied_coefficients <- biobroom::tidy.MArrayLM(fitted_model) %>% dplyr::filter(!stringr::str_detect(term, "sva"))
 
     tidied_stdev <- as.data.frame(fitted_model$stdev.unscaled) %>%
         dplyr::mutate(gene = rownames(.)) %>%
@@ -72,7 +72,7 @@ coefficientPlot <- function(input, output, session, data_file, overview) {
                 ymin = estimate - stdev,
                 ymax = estimate + stdev,
                 colour = DE,
-                text = paste0(stringr::str_remove(term,"diet"), round(estimate, 2), " +/- ", round(stdev, 2))
+                text = paste(stringr::str_remove(term,"diet"), round(estimate, 2), "+/-", round(stdev, 2))
                 )) +
             ggplot2::geom_errorbar(width = 0.2) +
             ggplot2::geom_pointrange() +

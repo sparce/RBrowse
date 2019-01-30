@@ -124,7 +124,7 @@ overviewPlot <- function(input, output, session, genome, gene_annotation = NULL)
     # Main plot
     output$overview_plot <- plotly::renderPlotly({
         validate(need(input$chrom, message = F))
-        #browser()
+
         #Empty plot
         p <- ggplot2::ggplot(data.frame(x=c(0, Biostrings::nchar(genome[input$chrom]))), ggplot2::aes(x))
 
