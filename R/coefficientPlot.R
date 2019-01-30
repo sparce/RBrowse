@@ -33,6 +33,8 @@ coefficientPlotUI <- function(id) {
 coefficientPlot <- function(input, output, session, data_file, overview) {
     ns = session$ns
 
+    if(!requireNamespace("limma")) stop("Need limma installed.")
+
     fitted_model <- readr::read_rds(data_file)
 
     tidied_coefficients <- biobroom::tidy.MArrayLM(fitted_model) %>% dplyr::filter(!stringr::str_detect(term, "sva"))
