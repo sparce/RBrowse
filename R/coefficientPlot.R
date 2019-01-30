@@ -33,7 +33,7 @@ coefficientPlotUI <- function(id) {
 coefficientPlot <- function(input, output, session, data_file, overview) {
     ns = session$ns
 
-    if(!requireNamespace("limma")) stop("Need limma installed.")
+    if(!requireNamespace("limma", quietly = T)) stop("Need limma installed.")
 
     fitted_model <- readr::read_rds(data_file)
 
